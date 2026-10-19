@@ -1,0 +1,136 @@
+{
+  "outfits": {
+    "type": "textarea",
+    "name": "手动换装预设",
+    "default": "",
+    "hint": "在桌宠设置页选择换装使用的表情和动作，桌面输入框上方可手动更换。事件由用户填写，留空不触发 AI；按模型保存。"
+  },
+  "resource_policy": {
+    "type": "textarea",
+    "name": "表情与动作可用设置",
+    "default": "",
+    "hint": "在桌宠设置页勾选可用项目，可整类或逐项禁用。按模型保存；禁用后不提供给 AI，也不能通过测试或旧工具调用使用。"
+  },
+  "model_overrides": {
+    "type": "textarea",
+    "name": "模型手动映射",
+    "default": "",
+    "hint": "自动识别普通 JSON 资源。可修改 AI 使用的名称，点击部位与拖动事件由用户填写。"
+  },
+  "bridge_port": {
+    "type": "integer",
+    "name": "桌面输入连接端口",
+    "default": 18765
+  },
+  "bubble_seconds": {
+    "type": "integer",
+    "name": "气泡显示秒数",
+    "default": 12
+  },
+  "voice_enabled": {
+    "type": "switch",
+    "name": "播放 KiraAI 语音回复",
+    "default": true,
+    "hint": "接收 KiraAI 的语音文件；不保证音频自动驱动口型。"
+  },
+  "voice_prompt": {
+    "type": "textarea",
+    "name": "语音回复提示词",
+    "default": "在本次桌宠私聊中，请更积极地使用语音回复。简短问候、安慰、情绪回应和日常闲聊优先用 <msg><record>自然口语的回复</record></msg>。代码、链接、较长说明或不适合朗读的内容仍用文字。语音和文字应放在不同的 <msg> 中，不要把 <record> 和其他消息元素混在同一个 <msg>，也不要用语音和文字重复发送同一段内容。仅在当前可用标签包含 record 时使用语音；没有可用语音能力时正常使用文字，不要声称已经生成语音。",
+    "hint": "只用于本插件网页/桌面输入框发起的对话。留空关闭引导；关闭语音播放或当前不可使用 record 标签时不注入。不强制每条生成语音。"
+  },
+  "click_enabled": {
+    "type": "switch",
+    "name": "点击角色触发回应",
+    "default": true
+  },
+  "touch_test_mode": {
+    "type": "switch",
+    "name": "测试模式（不触发 AI）",
+    "default": false,
+    "hint": "触摸和拖动事件只记录到测试面板，不发送 AI 消息。保留旧配置键以兼容已有设置。"
+  },
+  "click_cooldown": {
+    "type": "integer",
+    "name": "点击回应间隔（秒）",
+    "default": 8
+  },
+  "notes": {
+    "type": "info",
+    "name": "使用说明",
+    "hint": "本机模型切换后自动适配并恢复各自的配置。表情和动作显示当前映射，触摸部位和拖动事件由用户填写；测试模式只记录互动，不触发 AI。"
+  },
+  "drag_events": {
+    "type": "textarea",
+    "name": "拖动事件描述",
+    "default": "",
+    "hint": "由设置页自动列出拖动来源，填写各阶段供 AI 感知的事件；留空不触发，按模型保存。"
+  },
+  "continue_bound_session": {
+    "type": "switch",
+    "name": "使用网页聊天会话",
+    "default": false,
+    "hint": "默认关闭。开启后使用 KiraAI 原生网页聊天的会话上下文；网页输入、桌面输入及桌宠互动接续同一会话，无需选择绑定用户。关闭后使用桌宠独立上下文。切换不会合并或删除原会话。"
+  },
+  "ai_layout_enabled": {
+    "type": "switch",
+    "name": "允许 AI 调整大小和位置",
+    "default": false,
+    "hint": "默认关闭，按模型保存。开启后 AI 可在可见区域内移动，并按首次调整前大小的 50%～150% 缩放；支持恢复。原生壳直接控制。"
+  },
+  "drag_repeat_boundaries": {
+    "type": "switch",
+    "name": "允许重复触发拖动边界事件",
+    "default": false,
+    "hint": "默认关闭：同一次拖动中最大值、最小值各最多触发一次。开启后，离开再回到边界可再次触发；停在边界不会连续触发。AI 回应仍受互动间隔及忙碌状态限制。"
+  },
+  "screen_enabled": {
+    "type": "switch",
+    "name": "允许 AI 看屏幕",
+    "default": false,
+    "hint": "读取运行 KiraAI 电脑的主屏幕，交给当前会话的原生多模态或视觉模型。仅在 AI 调用时截图。"
+  },
+  "screen_schedule_enabled": {
+    "type": "switch",
+    "name": "允许 AI 预约看屏幕",
+    "default": false,
+    "hint": "允许 AI 安排 1～120 分钟后再看一次并主动互动。只保留一个预约，忙碌时顺延；切换模型、停止或重载插件会取消。需要先开启屏幕读取。"
+  },
+  "action_agent_enabled": {
+    "type": "switch",
+    "name": "独立动作 Agent",
+    "default": true,
+    "hint": "使用 KiraAI 默认聊天模型独立处理表情与动作；会增加模型请求。关闭后交还主聊天 Agent。"
+  },
+  "ai_control_copy_enabled": {
+    "type": "switch",
+    "name": "自动使用 AI 控制副本",
+    "default": true,
+    "hint": "按模型保存。自动生成清理自带文本、语音与自动触发配置的独立副本，保留待机、动作、表情和拖动参数；原模型及配置备份不改动。关闭并保存后恢复普通模型。"
+  },
+  "action_agent_max_steps": {
+    "type": "integer",
+    "name": "每轮最大决策步数",
+    "default": 8,
+    "hint": "在 Live2D 设置页调整独立动作 Agent 的单轮上限。"
+  },
+  "action_agent_max_motions": {
+    "type": "integer",
+    "name": "每轮最多动作数",
+    "default": 4,
+    "hint": "在 Live2D 设置页调整独立动作 Agent 的单轮上限。"
+  },
+  "action_agent_max_expressions": {
+    "type": "integer",
+    "name": "每轮最多表情次数",
+    "default": 2,
+    "hint": "在 Live2D 设置页调整独立动作 Agent 的单轮上限。"
+  },
+  "shell_connection_mode": {
+    "type": "string",
+    "name": "连接模式",
+    "default": "disabled",
+    "options": ["disabled", "local", "remote"],
+    "hint": "默认不启动。请在 Live2D 设置页顶部选择本机桌宠或远程壳；选择后立即应用并保存，下次启动沿用所选模式。远程壳支持 Windows 独立壳及安卓 App。"
+  }
+}

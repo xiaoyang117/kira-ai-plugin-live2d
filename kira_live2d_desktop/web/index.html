@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>Live2D 桌宠</title><link href="./style.css?v=0.24.4" rel="stylesheet"/></head>
+<body>
+<main>
+<header><div><span class="eyebrow">KIRA × LIVE2D</span><h1 data-i18n="title">Live2D 桌宠</h1><p data-i18n="intro">让你的 Live2D 模型，接上对话和记忆。</p></div><div class="header-actions"><button data-i18n="openDesktop" disabled="" id="open-desktop" type="button">打开桌面输入窗口</button><button class="secondary" data-i18n="refresh" id="refresh" type="button">重新读取</button></div></header>
+<div aria-live="polite" hidden="" id="notice" role="status"><span id="notice-text"></span><button aria-label="关闭提示" id="dismiss-notice" type="button">×</button></div>
+<section aria-label="Connection status" class="status-grid">
+<article class="shell-status-card"><label for="shell_connection_mode">连接模式</label><select id="shell_connection_mode" disabled="" aria-describedby="viewer-detail"><option value="disabled">不启动</option><option value="local">本机桌宠</option><option value="remote">远程壳（Windows / 安卓）</option></select><strong id="viewer-status">未启动</strong><small id="viewer-detail">选择连接模式后启动</small>
+<div id="remote-connection" hidden=""><small id="remote-address-help"></small><label for="remote-access-key">访问密钥</label><div class="remote-key-row"><input id="remote-access-key" readonly="" type="text" spellcheck="false" autocomplete="off"/><button class="secondary" id="copy-remote-key" type="button">复制</button></div><small id="remote-status"></small></div></article>
+<article><span data-i18n="memory">会话模式</span><strong id="memory-status">…</strong><small id="memory-detail"></small></article>
+<article><span data-i18n="conversation">桌面对话</span><strong id="chat-status">…</strong><small data-i18n="route">网页聊天同步保存</small></article>
+</section>
+<form id="settings"><div class="fold-toolbar"><button class="secondary" data-i18n="expandFolds" id="expand-folds" type="button">全部展开</button><button class="secondary" data-i18n="collapseFolds" id="collapse-folds" type="button">全部收起</button></div><fieldset disabled="" id="fields"><details class="card" data-fold-key="native-shell" open=""><summary class="fold-summary"><h2>Live2D</h2></summary><div class="fold-body">
+
+<input id="native_model_path" name="native_model_path" type="hidden"/>
+<div id="model-drop" class="model-drop" role="group" aria-label="导入 Live2D 模型">
+<strong>拖入模型文件夹、ZIP、LPK 或 WPK</strong>
+<p class="tip">普通模型需包含完整资源；LPK / WPK 自动解包，创意工坊 LPK 请连同 config.json 一起导入。支持 Cubism 3，最大 512 MB。</p>
+<div class="button-row"><button class="secondary" id="choose-model-folder" type="button">选择文件夹</button><button class="secondary" id="choose-model-package" type="button">选择文件</button></div>
+<input id="model-folder-files" type="file" webkitdirectory="" multiple="" hidden=""/><input id="model-package-files" type="file" accept=".lpk,.json,.wpk,.zip" multiple="" hidden=""/>
+<p id="model-import-status" class="tip" role="status" aria-live="polite"></p>
+<p class="tip" id="lpk-tool-status" role="status" aria-live="polite"></p>
+</div>
+<label for="model-library">可选模型</label><select id="model-library"></select>
+<p class="tip">保留已使用和已导入的模型。选择后自动切换，已启用的壳会重新加载并更新状态；“不启动”模式仅保存模型。表情、动作、互动、换装及位置大小随模型保存。导入不会修改原文件。</p>
+<div class="model-resource-row"><p class="tip" id="model-summary" role="status"></p><button class="secondary" data-i18n="rescanModel" disabled="" id="rescan-model" type="button" title="重新读取模型资源，保留映射、禁用项、互动与换装配置">重新识别</button></div>
+<p class="tip" id="model-follow-status" role="status" hidden=""></p>
+<details class="subfold" id="model-warnings" hidden=""><summary class="fold-summary"><h3 id="model-warnings-title">资源提示</h3></summary><div class="fold-body"><p class="tip" id="model-warnings-text"></p></div></details>
+<label class="toggle"><span><b>自动使用 AI 控制副本</b><small>默认开启，按模型保存。去掉副本自带文本、语音和自动触发配置，保留待机、动作、表情与拖动参数；原模型及配置备份不改动。关闭并保存即可切回普通模型，映射、互动和位置大小不变。</small></span><input id="ai_control_copy_enabled" name="ai_control_copy_enabled" role="switch" type="checkbox"/></label>
+<p class="tip" id="ai-copy-status" role="status" aria-live="polite"></p>
+<p class="tip">默认不启动，请在页面顶部选择连接模式；选择后立即应用并保存，下次启动沿用所选模式。本机桌宠支持 Cubism 3 JSON 模型，透明处自动穿透到下面的窗口；右键或系统托盘可打开调试面板。</p>
+<label class="toggle"><span><b>独立动作 Agent</b><small>使用 KiraAI 默认聊天模型，结合当前人设、用户输入和历史上下文，与主聊天并行选择表情与动作，不接收本轮主聊天输出，双方互不等待；会增加模型调用。关闭后由主聊天 Agent 控制。仅独立壳模式生效。</small></span><input id="action_agent_enabled" name="action_agent_enabled" role="switch" type="checkbox"/></label>
+<p class="tip" id="action-agent-status" role="status"></p>
+<details class="subfold" data-fold-key="action-agent-limits"><summary class="fold-summary"><h3>动作 Agent 每轮上限</h3></summary><div class="fold-body">
+<label for="action_agent_max_steps">最大决策步数</label><input id="action_agent_max_steps" name="action_agent_max_steps" type="number" min="1" max="64" required=""/>
+<label for="action_agent_max_motions">最多动作数</label><input id="action_agent_max_motions" name="action_agent_max_motions" type="number" min="1" max="32" required=""/>
+<label for="action_agent_max_expressions">最多表情次数</label><input id="action_agent_max_expressions" name="action_agent_max_expressions" type="number" min="0" max="32" required=""/>
+<small>决策步数包含查看资源、动作、表情和结束步骤。上限越高，可能使用更多模型请求。短期上下文直接读取当前 KiraAI 会话，跟随 KiraAI 的记忆长度和清理结果；不会另设固定 8 条限制。</small>
+</div></details>
+<p class="tip">自动读取动作声明与目录中的 motion3.json，分析名称、时长及参数曲线。映射表会显示用途建议，不修改手填名称；这些建议不代表已视觉验证。新资源可用“重新识别模型”读取。</p>
+<div class="button-row"><button class="secondary" id="native-restart" type="button">重新启动独立壳</button><button class="secondary" id="native-debug" type="button">调试位置、大小与交互框</button></div>
+<details class="subfold" data-fold-key="remote-shell"><summary class="fold-summary"><h3>远程壳连接</h3></summary><div class="fold-body">
+<p class="tip">在页面顶部选择“远程壳”后，本机只运行 KiraAI，桌宠由 Windows 独立壳或安卓 App 显示。模型与互动配置自动同步；同一时间只接入一个远程壳。</p>
+<button class="secondary" id="download-remote-shell" type="button">下载独立远程壳</button>
+<p class="tip">Windows：将远程壳解压后运行 start.cmd，首次自动准备组件。安卓：安装并打开 App。按页面顶部的说明填写连接地址，并使用下方的访问密钥。屏幕工具仍读取 KiraAI 所在电脑的屏幕。</p>
+</div></details>
+<details class="subfold" data-fold-key="native-advanced"><summary class="fold-summary"><h3>高级连接设置</h3></summary><div class="fold-body"><label for="bridge_port">桌面输入连接端口</label><input id="bridge_port" max="65535" min="1024" name="bridge_port" required="" type="number"/><small>一般无需修改，仅在端口冲突时调整。</small></div></details>
+</div></details>
+
+<details class="card" data-fold-key="identity"><summary class="fold-summary"><h2 data-i18n="identity">对话身份与记忆</h2></summary><div class="fold-body"><p class="section-intro" data-i18n="identityHint">选择使用网页聊天的上下文，或保留桌宠独立上下文。</p>
+<label class="toggle"><span><b data-i18n="continueSession">使用网页聊天会话</b><small data-i18n="continueHint">默认关闭。开启后接续 KiraAI 网页聊天原有上下文，网页输入、桌面输入和桌宠互动使用同一会话，无需绑定用户；关闭后使用桌宠独立上下文。切换不会合并或删除原会话。</small></span><input id="continue_bound_session" name="continue_bound_session" role="switch" type="checkbox"/></label>
+</div></details>
+<details class="card" data-fold-key="outfits"><summary class="fold-summary"><h2 data-i18n="outfitsTitle">手动换装</h2></summary><div class="fold-body">
+<input id="outfits" name="outfits" type="hidden"/>
+<p class="tip" data-i18n="outfitsHint">选入用于换衣服的表情或动作，可组合使用。保存后，桌面输入框的“更换”和 AI 都可选择这些可用项目。手动换装事件由你填写，留空或测试模式不触发回复。换装参数由原生壳保持，按模型分别保存。</p>
+<div id="outfit-mappings"></div><button class="secondary mapping-add" data-i18n="addOutfit" id="add-outfit" type="button">添加换装项</button>
+</div></details>
+<details class="card" data-fold-key="mappingTitle"><summary class="fold-summary"><h2 data-i18n="mappingTitle">模型映射与触摸区域</h2></summary><div class="fold-body"><p class="section-intro" data-i18n="mappingHint" id="mapping-hint">自动读取普通 JSON 的表情、动作和点击区域。直接编辑 AI 使用的名称；触摸部位由你填写。修改后保存，或恢复自动识别。</p>
+<input id="model_overrides" name="model_overrides" type="hidden">
+<input id="resource_policy" name="resource_policy" type="hidden"/>
+<p class="tip" data-i18n="resourcePolicyHint">关闭整类开关，或取消表格中某项的“可用”勾选，可阻止 AI 和测试调用。保存后按模型生效；禁用项仍显示在表中，方便重新开启。全部关闭时正常聊天，不再要求附带表情或动作。</p>
+<label class="toggle"><span><b data-i18n="allowExpressions">允许使用表情</b></span><input id="allow-expressions" role="switch" type="checkbox"/></label>
+<label class="toggle"><span><b data-i18n="allowDefaultExpression">允许恢复默认表情</b></span><input id="allow-default-expression" role="switch" type="checkbox"/></label>
+<label class="toggle"><span><b data-i18n="allowMotions">允许使用动作</b></span><input id="allow-motions" role="switch" type="checkbox"/></label>
+<details class="subfold" data-fold-key="mapping-expressions" hidden="" id="manual-expressions"><summary class="fold-summary"><h3 data-i18n="currentExpressions">当前表情映射</h3></summary><div class="fold-body">
+<div aria-label="表情可用项" class="button-row mapping-selection" role="group"><button class="secondary" data-i18n="selectAllResources" data-map-select="expressions" data-select-value="all" type="button">全选</button><button class="secondary" data-i18n="selectNoResources" data-map-select="expressions" data-select-value="none" type="button">全不选</button></div>
+<div class="mapping-table-wrap"><table class="mapping-table"><thead><tr><th data-i18n="mappingName">AI 使用的名称</th><th data-i18n="expressionIndex">表情编号</th><th data-i18n="preview">预览</th><th data-i18n="resourceAvailable">可用</th><th data-i18n="mappingActions">操作</th></tr></thead><tbody id="resolved-expressions"></tbody></table></div>
+<div class="button-row"><button class="secondary" data-i18n="resetMapping" data-map-reset="expressions" type="button">恢复自动识别</button></div>
+<p class="tip" data-i18n="resolvedMappingHint">直接修改 AI 使用的名称，保存后生效。编号和播放目标只读，改名不会改变底层资源。点击“恢复自动识别”并保存，可清除该类手动修改。</p>
+</div></details>
+<details class="subfold" data-fold-key="mapping-motions" hidden="" id="manual-motions"><summary class="fold-summary"><h3 data-i18n="currentMotions">当前动作映射</h3></summary><div class="fold-body">
+<div aria-label="动作可用项" class="button-row mapping-selection" role="group"><button class="secondary" data-i18n="selectAllResources" data-map-select="motions" data-select-value="all" type="button">全选</button><button class="secondary" data-i18n="selectNoResources" data-map-select="motions" data-select-value="none" type="button">全不选</button></div>
+<div class="mapping-table-wrap"><table class="mapping-table"><thead><tr><th data-i18n="mappingName">AI 使用的名称</th><th data-i18n="motionTarget">动作组 / 事件 / 文件</th><th data-i18n="preview">预览</th><th data-i18n="resourceAvailable">可用</th><th data-i18n="mappingActions">操作</th></tr></thead><tbody id="resolved-motions"></tbody></table></div>
+<p class="tip" data-i18n="resolvedMappingHint">直接修改 AI 使用的名称，保存后生效。编号和播放目标只读，改名不会改变底层资源。点击“恢复自动识别”并保存，可清除该类手动修改。</p>
+</div></details>
+<details class="subfold" data-fold-key="mapping-touch" hidden="" id="manual-touch"><summary class="fold-summary"><h3 data-i18n="touchMap">点击区域 → 身体部位</h3></summary><div class="fold-body">
+<small data-i18n="touchMapHint">自动列出模型声明、点击动作组推断和实际收到的区域名，由你手填具体部位，如头部、左手或裙摆。动作组推断项需实际点击确认；留空时按普通点击处理。填写后保存生效。</small><div id="touch-mappings"></div><button class="secondary mapping-add" data-i18n="addTouch" data-section="touch" type="button">添加触摸映射</button>
+</div></details>
+<p class="tip" id="touch-detected"></p>
+</div></details>
+<details class="card" data-fold-key="dragTitle" hidden="" id="drag-card"><summary class="fold-summary"><h2 data-i18n="dragTitle">拖动事件 → AI 感知</h2></summary><div class="fold-body">
+<p class="tip" data-i18n="dragHint">原生壳直接读取模型拖动声明，保留参数互动。填写各阶段发生了什么，留空不触发 AI；调试面板可核对拖动区域。未声明拖动控制器的模型不会凭空生成拖动项。</p>
+<label class="toggle"><span><b data-i18n="dragRepeat">允许重复触发拖动边界事件</b><small data-i18n="dragRepeatHint">默认关闭：同一次拖动中最大值、最小值各最多触发一次。开启后离开再回到边界可再次触发；停在边界不连续触发。AI 回应仍受互动间隔和忙碌状态限制。</small></span><input id="drag_repeat_boundaries" name="drag_repeat_boundaries" role="switch" type="checkbox"/></label>
+<input id="drag_events" name="drag_events" type="hidden"/><p class="tip" id="drag-preview-status" role="status"></p><div id="drag-mappings"></div>
+<p class="tip" id="event-bridge-status" role="status"></p>
+
+</div></details>
+<details class="card" data-fold-key="behavior"><summary class="fold-summary"><h2 data-i18n="behavior">桌宠表现</h2></summary><div class="fold-body"><p class="section-intro" data-i18n="behaviorHint">调整气泡、语音和点击互动。</p>
+<div class="pair"><div><label data-i18n="bubbleTime" for="bubble_seconds">气泡显示秒数</label><input id="bubble_seconds" max="120" min="2" name="bubble_seconds" required="" type="number"/></div><div><label data-i18n="cooldown" for="click_cooldown">点击回应间隔（秒）</label><input id="click_cooldown" max="3600" min="2" name="click_cooldown" required="" type="number"/></div></div>
+<label class="toggle"><span><b data-i18n="voice">播放语音回复</b><small data-i18n="voiceHint">播放 KiraAI 生成的语音文件。</small></span><input id="voice_enabled" name="voice_enabled" role="switch" type="checkbox"/></label>
+<details class="subfold" data-fold-key="voice-prompt"><summary class="fold-summary"><h3 data-i18n="voicePrompt" id="voice-prompt-label">语音回复提示词</h3></summary><div class="fold-body"><textarea aria-labelledby="voice-prompt-label" id="voice_prompt" maxlength="2048" name="voice_prompt" rows="6"></textarea><small data-i18n="voicePromptHint">仅引导桌宠输入框的对话，留空关闭。需启用语音播放，并在 KiraAI 中配置可用语音模型；不强制每条生成。</small></div></details>
+<label class="toggle"><span><b data-i18n="click">点击角色触发回应</b><small data-i18n="clickHint">点击可见模型，按区域映射回应；透明处点击下面的窗口。</small></span><input id="click_enabled" name="click_enabled" role="switch" type="checkbox"/></label>
+</div></details>
+<details class="card" data-fold-key="screenTitle"><summary class="fold-summary"><h2 data-i18n="screenTitle">看屏幕与主动互动</h2></summary><div class="fold-body">
+<label class="toggle"><span><b data-i18n="allowScreen">允许 AI 看屏幕</b><small data-i18n="screenHint">默认关闭。AI 调用时读取运行 KiraAI 电脑的主屏幕，交给当前会话的原生多模态或视觉模型，不会操作电脑。需要 KiraAI 已启用图片识别并配置相应模型；截图可能随原生多模态会话历史保存。</small></span><input id="screen_enabled" name="screen_enabled" role="switch" type="checkbox"/></label>
+<label class="toggle"><span><b data-i18n="allowScreenLater">允许 AI 预约看屏幕</b><small data-i18n="screenLaterHint">需先开启屏幕读取。AI 可安排 1～120 分钟后看一次并主动互动，只保留一个预约；忙碌时最多顺延 10 分钟。切换模型、停止或重载插件会取消，测试模式不触发主动观察。</small></span><input id="screen_schedule_enabled" name="screen_schedule_enabled" role="switch" type="checkbox"/></label>
+<p class="tip" id="screen-status" role="status"></p><button class="secondary" data-i18n="cancelScreen" id="cancel-screen" type="button">取消看屏幕预约</button>
+</div></details>
+<details class="card" data-fold-key="layoutTitle" id="layout-card"><summary class="fold-summary"><h2 data-i18n="layoutTitle">大小与位置</h2></summary><div class="fold-body">
+<label class="toggle"><span><b data-i18n="aiLayout">允许 AI 调整大小和位置</b><small data-i18n="aiLayoutHint">默认关闭，按模型保存。开启后 AI 可调整原生壳位置，并按首次调整前大小的 50%～150% 缩放。调试时暂停 AI 调整。</small></span><input id="ai_layout_enabled" name="ai_layout_enabled" role="switch" type="checkbox"/></label>
+<p class="tip" data-i18n="layoutBackupHint">首次 AI 调整前自动备份位置与大小，可用下面的按钮恢复。手动调整请打开原生壳调试面板。</p>
+<div class="button-row"><button class="secondary" data-i18n="restoreLayout" id="restore-layout" type="button">恢复 AI 调整前的大小和位置</button></div>
+<p class="tip" id="layout-status" role="status"></p>
+</div></details>
+<details class="card" data-fold-key="testModeTitle" id="interaction-test"><summary class="fold-summary"><h2 data-i18n="testModeTitle">测试模式</h2></summary><div class="fold-body">
+<label class="toggle"><span><b data-i18n="touchTestMode">测试模式（不触发 AI）</b><small data-i18n="touchTestHint">只记录触摸、拖动和手动换装事件，不触发 AI。位置大小与交互框的可视调试请使用顶部的调试按钮。</small></span><input id="touch_test_mode" name="touch_test_mode" role="switch" type="checkbox"/></label>
+<p class="tip" id="touch-mode-status" role="status"></p><p class="tip" id="touch-latest" role="status"></p>
+<div aria-live="polite" class="interaction-log" id="interaction-log"></div>
+</div></details>
+
+</fieldset><footer><span data-i18n="loading" id="save-state">正在读取配置…</span><button data-i18n="save" disabled="" id="save" type="submit">保存并生效</button></footer></form>
+</main><script src="/plugin-bridge.js"></script><script src="./app.js?v=0.24.4"></script>
+</body></html>
