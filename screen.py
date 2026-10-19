@@ -1,5 +1,6 @@
 """Explicit screen observation and one-shot, session-bound follow-ups."""
 import asyncio
+from .plugin_identity import PLUGIN_ID
 import base64
 from datetime import datetime
 import io
@@ -57,7 +58,7 @@ class ScreenControl:
 
     def check(self, target=None):
         plugin = self.plugin
-        if not plugin.accepting or plugin.ctx.get_plugin_inst('kira_live2d_desktop') is not plugin:
+        if not plugin.accepting or plugin.ctx.get_plugin_inst(PLUGIN_ID) is not plugin:
             raise ValueError('桌宠正在停止或重载')
         if not plugin.plugin_cfg.get('screen_enabled', False):
             raise ValueError('请先在桌宠设置开启“允许 AI 看屏幕”')

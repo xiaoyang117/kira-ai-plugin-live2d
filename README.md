@@ -1,12 +1,12 @@
 # KiraAI 原生 Live2D 桌宠插件
 
-适用于 **KiraAI 3.0** 的原生 Live2D 桌宠插件，当前版本 **0.24.4**。
+适用于 **KiraAI 3.0** 的原生 Live2D 桌宠插件，当前版本 **0.25.0**。
 
 独立连接端源码和安装包另见 [kira-live2d-client](https://github.com/xiaoyang117/kira-live2d-client)。
 
 ## 安装
 
-从 [Releases](https://github.com/xiaoyang117/kiraai-live2d-desktop/releases/latest) 下载 `kira_live2d_desktop-0.24.4.zip`，在 KiraAI 插件管理中安装、启用，进入「Live2D 桌宠」配置。
+从 [Releases](https://github.com/xiaoyang117/kira-ai-plugin-live2d/releases/latest) 下载 `kira-ai-plugin-live2d-0.25.0.zip`，在 KiraAI 插件管理中安装、启用，进入「Live2D 桌宠」配置。
 
 首次安装默认不启动壳，请导入有权使用的模型，再手动选择：
 
@@ -15,6 +15,14 @@
 - **不启动**：不启动渲染进程。
 
 Windows 独立端和安卓 APK 在 [连接端 Releases](https://github.com/xiaoyang117/kira-live2d-client/releases/latest) 下载。
+
+## 作者与兼容版本
+
+- 作者：**xiaoyang117**。
+- 插件 ID：`kira-ai-plugin-live2d`。
+- 适用 KiraAI：`>=3.0.0,<4.0.0`，已实际验证 3.0.0。
+- 新版启用前请停用旧版 `kira_live2d_desktop`；第一次启用将导入尚未自定义的新配置，并继续使用旧模型与数据目录，保留远程密钥和原会话身份。请不要删除旧版数据目录。新配置不会反复被旧配置覆盖。
+- Windows 连接端稳定包见连接端 Releases；安卓仍作为测试包保留，暂不提交插件商店。
 
 ## 功能
 
@@ -27,14 +35,14 @@ Windows 独立端和安卓 APK 在 [连接端 Releases](https://github.com/xiaoy
 
 ## 文档与源码
 
-- [详细使用教程](kira_live2d_desktop/使用教程.md)
-- [版本记录与插件说明](kira_live2d_desktop/README.md)
+- [详细使用教程](使用教程.md)
+- [版本记录与插件说明](CHANGELOG.md)
 - 打包插件：`python tools/build_package.py`，输出至 `dist/`。
 - `native_shell/` 与 `remote_shell/` 保留插件所需的原生壳与按需打包逻辑；可单独使用的连接端在另一仓库维护。
-- Python 回归测试位于 `kira_live2d_desktop/tests`，依赖 KiraAI 本体环境。部分测试保留开发机路径并使用未分发的模型样本，目前尚未改为通用 CI。
+- Python 回归测试位于 `tests`，依赖 KiraAI 本体环境。部分测试保留开发机路径并使用未分发的模型样本，目前尚未改为通用 CI。
 
 ## 模型与第三方组件
 
 支持 KiraAI `>=3.0.0,<4.0.0`、Cubism 3 及以上模型资源。仓库和发布包不附带个人模型、聊天记录、密钥、签名私钥或开发缓存。请自行准备有权使用的模型。
 
-原生组件和解包工具适用各自许可，参见 [第三方组件说明](kira_live2d_desktop/native_shell/THIRD_PARTY.md)。
+原生组件和解包工具适用各自许可，参见 [第三方组件说明](native_shell/THIRD_PARTY.md)。

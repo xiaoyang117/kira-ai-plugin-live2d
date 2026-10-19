@@ -34,7 +34,7 @@ from .motion_analysis import add_discovered,catalog
 from .resource_policy import read_policy, allowed, apply_analysis, apply_appearance
 from .outfits import read_outfits, outfit_expression_indices
 
-PLUGIN_ID = 'kira_live2d_desktop'
+from .plugin_identity import PLUGIN_ID, LEGACY_ID, migrate_legacy_identity
 ADAPTER_NAME = 'kira_desktop'
 CONFIG_LOCK = asyncio.Lock()
 IMPORT_LOCK = asyncio.Lock()
@@ -129,6 +129,13 @@ class Live2DDesktopPlugin(BasePlugin):
         return mode if mode in ('disabled','local','remote') else 'disabled'
 
     async def initialize(self):
+        if self.ctx.get_plugin_inst(LEGACY_ID) is not None:
+            raise ValueError('请先停用旧版 Live2D 桌宠，再启用新版；旧配置和模型会自动接续')
+        from core.utils.path_utils import get_config_path
+        schema = json.loads((Path(__file__).parent / 'schema.json').read_text(encoding='utf-8'))
+        self.data_dir = migrate_legacy_identity(self.plugin_cfg, self.ctx.get_plugin_data_dir(),
+            get_config_path() / 'plugins', {key: field.get('default') for key, field in schema.items()})
+        self.recipient = recipient_id(str(self.plugin_cfg.get('binding_session', '')))
         if self.use_webchat_session and not getattr(self.ctx.adapter_mgr.get_adapter('webchat'),'store',None):
             raise ValueError('内置网页聊天未启用，无法使用网页聊天会话')
         from .native_shell.client import NativeClient,NativeFollower,InactiveNativeClient
@@ -144,7 +151,6 @@ class Live2DDesktopPlugin(BasePlugin):
         port = int(self.plugin_cfg.get('bridge_port', 18765))
         if not 1024 <= port <= 65535:
             raise ValueError('桌面连接端口需在 1024 到 65535 之间')
-        self.data_dir = self.ctx.get_plugin_data_dir()
         self.layout.initialize()
         schema = json.loads((Path(__file__).parent / 'schema.json').read_text(encoding='utf-8'))
         self.model_follower=NativeFollower(self.data_dir,'',0,{key:schema[key]['default'] for key in MODEL_FIELDS})

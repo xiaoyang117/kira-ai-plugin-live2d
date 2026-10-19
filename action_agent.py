@@ -1,5 +1,6 @@
 """Independent, bounded observe/decide/execute loop for avatar performance."""
 import asyncio
+from .plugin_identity import PLUGIN_ID
 from collections import deque
 import json
 import time
@@ -178,7 +179,7 @@ class ActionAgent:
         return True
     def guard(self,job):
         p=self.plugin
-        if self.closed or not self.enabled or not p.accepting or p.ctx.get_plugin_inst('kira_live2d_desktop') is not p:
+        if self.closed or not self.enabled or not p.accepting or p.ctx.get_plugin_inst(PLUGIN_ID) is not p:
             raise ValueError('动作 Agent 已停止或替换')
         if p.plugin_cfg.get('touch_test_mode',False):raise ValueError('测试模式暂停动作 Agent')
         if job['generation']!=self.generation or job['target']!=(p.sid,p.tracking_status()['key'],p.token):

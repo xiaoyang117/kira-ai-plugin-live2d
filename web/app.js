@@ -230,7 +230,7 @@ $('dismiss-notice').addEventListener('click',()=>{clearTimeout(noticeTimer);$('n
 async function api(path,body){
  const token=window.PluginPageContext?.getToken?.(),controller=new AbortController(),timer=setTimeout(()=>controller.abort(),path==='model/unpack'?300000:path==='model/prepare'?120000:['model/select','native/mode','settings'].includes(path)?30000:12000);
  try{
-  const response=await fetch('/api/plugin/kira_live2d_desktop/'+path,{method:body===undefined?'GET':'POST',credentials:'same-origin',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body===undefined?{}:{body:JSON.stringify(body)})});
+  const response=await fetch('/api/plugin/kira-ai-plugin-live2d/'+path,{method:body===undefined?'GET':'POST',credentials:'same-origin',cache:'no-store',signal:controller.signal,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},...(body===undefined?{}:{body:JSON.stringify(body)})});
   const data=await response.json().catch(error=>{if(error.name==='AbortError')throw error;return {};});if(!response.ok)throw Error(typeof data.detail==='string'?data.detail:t('httpError','请求失败')+' ('+response.status+')');return data;
  }catch(error){if(error.name==='AbortError')throw Error(t('timeout','请求超时，请稍后重试。'));if(error instanceof TypeError)throw Error(t('networkError','无法连接 KiraAI，请检查连接。'));throw error;}
  finally{clearTimeout(timer);}
@@ -301,7 +301,7 @@ async function importModels(files){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),600000);
  importingModel=true;actionEpoch++;$('model-import-status').textContent='正在上传并检查模型资源；LPK 首次使用会下载工具并自动解包…';updateSave();
  let progressBusy=false;const progressTimer=setInterval(async()=>{if(progressBusy||!importingModel)return;progressBusy=true;try{const state=await api('model/tools');if(importingModel){renderModelTools(state);if(state.import_state?.message)$('model-import-status').textContent=state.import_state.message;}}catch{}finally{progressBusy=false;}},1000);
- try{const token=window.PluginPageContext?.getToken?.();const response=await fetch('/api/plugin/kira_live2d_desktop/model/import',{method:'POST',body,credentials:'same-origin',headers:token?{Authorization:'Bearer '+token}:{},signal:controller.signal});
+ try{const token=window.PluginPageContext?.getToken?.();const response=await fetch('/api/plugin/kira-ai-plugin-live2d/model/import',{method:'POST',body,credentials:'same-origin',headers:token?{Authorization:'Bearer '+token}:{},signal:controller.signal});
  const data=await response.json();if(!response.ok)throw Error(typeof data.detail==='string'?data.detail:'模型上传失败');
  lastData.model_library=data.model_library;if(data.model_tools){lastData.model_tools=data.model_tools;renderModelTools(data.model_tools);}
  const selected=data.imported.length===1?data.imported[0]:config.native_model_path;
@@ -804,7 +804,7 @@ $('copy-remote-key').addEventListener('click',async()=>{
 });
 $('download-remote-shell').addEventListener('click',async()=>{
  const button=$('download-remote-shell');button.disabled=true;
- try{const token=window.PluginPageContext?.getToken?.();const response=await fetch('/api/plugin/kira_live2d_desktop/remote/download',{credentials:'same-origin',headers:token?{Authorization:'Bearer '+token}:{}});if(!response.ok)throw new Error('下载远程壳失败');const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download='Kira-Live2D-Remote.zip';link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+ try{const token=window.PluginPageContext?.getToken?.();const response=await fetch('/api/plugin/kira-ai-plugin-live2d/remote/download',{credentials:'same-origin',headers:token?{Authorization:'Bearer '+token}:{}});if(!response.ok)throw new Error('下载远程壳失败');const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download='Kira-Live2D-Remote.zip';link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
  catch(error){notify(error.message,true);}finally{button.disabled=false;}
 });
 async function boot(){

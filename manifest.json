@@ -1,0 +1,25 @@
+{
+  "plugin_id": "kira-ai-plugin-live2d",
+  "display_name": "Live2D 桌宠",
+  "version": "0.25.0",
+  "core_version": ">=3.0.0,<4.0.0",
+  "author": "xiaoyang117",
+  "description": "原生 Live2D 桌宠、独立动作 Agent、拖动互动与可视调试",
+  "tags": [
+    "live2d",
+    "desktop",
+    "interaction"
+  ],
+  "repo": "https://github.com/xiaoyang117/kira-ai-plugin-live2d",
+  "icon": "icon.svg",
+  "locales": {
+    "zh": {
+      "display_name": "Live2D 桌宠",
+      "description": "原生 Live2D 桌宠、独立动作 Agent、换装及触摸拖动互动，支持 Windows 与安卓连接端。"
+    },
+    "en": {
+      "display_name": "Live2D Companion",
+      "description": "Native Live2D companion with an independent action agent, outfits, touch and drag interactions, and Windows/Android clients."
+    }
+  }
+}

@@ -28,7 +28,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         for name,value in [('PLUGIN_CONFIG_DIR',Path(RUNTIME.name)/'config/plugins'),('PLUGIN_STATE_FILE',Path(RUNTIME.name)/'config/plugins.json')]:
             setting=patch.object(manager_module,name,value);setting.start();self.addCleanup(setting.stop)
         self.queue=asyncio.Queue()
-        cfg=Path(RUNTIME.name)/'config/plugins/kira_live2d_desktop.json';cfg.parent.mkdir(parents=True,exist_ok=True)
+        cfg=Path(RUNTIME.name)/'config/plugins/kira-ai-plugin-live2d.json';cfg.parent.mkdir(parents=True,exist_ok=True)
         with socket.socket() as sock:sock.bind(('127.0.0.1',0));self.port=sock.getsockname()[1]
         # Keep an old renderer setting deliberately: it must never start ViewerEX.
         cfg.write_text(json.dumps({'renderer_mode':'viewerex','viewer_url':'ws://invalid.invalid/api','shell_connection_mode':'local','bridge_port':self.port,'native_model_path':str(ROOT/'models/Yayoi_Sakura_ViewerEX/Yayoi_Sakura.model3.json'),'touch_test_mode':True}),encoding='utf-8')
@@ -48,7 +48,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         self.service=WebChatService(self.web_adapter,SimpleNamespace(update_session=AsyncMock()))
         self.manager=PluginManager(self.ctx);self.ctx.plugin_mgr=self.manager
         await self.manager.load_plugin_from_dir(ROOT/'kira_live2d_desktop',auto_install=False)
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop');self.assertIsNotNone(self.plugin)
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d');self.assertIsNotNone(self.plugin)
         self.client=ClientSession();self.headers={'Authorization':'Bearer '+self.plugin.token}
         self.url=f'http://127.0.0.1:{self.port}'
         self.plugin.viewer.process=SimpleNamespace(poll=lambda:0)
@@ -57,9 +57,9 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         self.plugin.viewer.process=SimpleNamespace(poll=lambda:None,wait=lambda:0)
         self.plugin.viewer.send=AsyncMock(return_value=1);self.plugin.viewer.request=AsyncMock(return_value={})
     async def asyncTearDown(self):
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop') or self.plugin
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d') or self.plugin
         if self.plugin.viewer:self.plugin.viewer.process=None
-        await self.manager.terminate('kira_live2d_desktop');await self.client.close()
+        await self.manager.terminate('kira-ai-plugin-live2d');await self.client.close()
     def request(self,body):return SimpleNamespace(body=AsyncMock(return_value=json.dumps(body).encode()),json=AsyncMock(return_value=body))
     async def test_native_only_load_and_authenticated_feedback(self):
         self.assertTrue(self.plugin.native_mode)
@@ -192,7 +192,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
     async def test_save_and_reload_webchat_context_without_selected_user(self):
         values=self.plugin.configuration();values.update(continue_bound_session=True,binding_session='',nickname='')
         await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertTrue(self.plugin.use_webchat_session)
         self.assertEqual(self.plugin.sid,'webchat:dm:admin')
         self.assertEqual(self.plugin.binding(),None)
@@ -215,7 +215,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         values=self.plugin.configuration();values['bubble_seconds']=18
         old_data_dir=self.plugin.data_dir
         result=await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(result['config']['bubble_seconds'],18)
         self.assertTrue(self.plugin.native_mode);self.assertTrue(self.plugin.tracking_status()['following'])
         store=json.loads((old_data_dir/'model-settings.json').read_text(encoding='utf-8'))
@@ -238,22 +238,22 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(any(item['path']==target for item in result['model_library']))
         values=self.plugin.configuration();original=values['native_model_path'];values['bubble_seconds']=47
         await self.plugin.settings_save(self.request({'revision':self.plugin.config_revision(),'config':values}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         values=self.plugin.configuration();values['native_model_path']=target
         await self.plugin.settings_save(self.request({'revision':self.plugin.config_revision(),'config':values}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(self.plugin.plugin_cfg['native_model_path'],target)
         self.assertNotEqual(self.plugin.plugin_cfg['bubble_seconds'],47,'A new model must not inherit the previous settings')
         values=self.plugin.configuration();values['bubble_seconds']=21
         await self.plugin.settings_save(self.request({'revision':self.plugin.config_revision(),'config':values}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         values=self.plugin.configuration();values['native_model_path']=original
         await self.plugin.settings_save(self.request({'revision':self.plugin.config_revision(),'config':values}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(self.plugin.plugin_cfg['bubble_seconds'],47)
         values=self.plugin.configuration();values['native_model_path']=target
         await self.plugin.settings_save(self.request({'revision':self.plugin.config_revision(),'config':values}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(self.plugin.plugin_cfg['bubble_seconds'],21)
 
     async def test_settings_does_not_query_unused_full_chat_session_history(self):
@@ -270,7 +270,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         before=self.plugin.configuration();key=self.plugin.tracking_status()['key']
         values=dict(before);values['ai_control_copy_enabled']=False
         result=await self.plugin.settings_save(self.request({'revision':self.plugin.config_revision(),'config':values}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertFalse(result['config']['ai_control_copy_enabled'])
         self.assertEqual(self.plugin.tracking_status()['key'],key)
         for field in ('native_model_path','model_overrides','resource_policy','drag_events','outfits'):
@@ -284,7 +284,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         target=ModelLibrary(self.plugin.data_dir).import_files(uploads(files),list(files))[0]
         before=self.native.NativeClient.start.await_count
         result=await self.plugin.select_model(self.request({'path':target,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(self.native.NativeClient.start.await_count,before+1)
         self.assertEqual(result['config']['native_model_path'],target)
         self.assertFalse(result['status']['viewer_connected'])
@@ -309,7 +309,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(result.exception.status_code,422)
         values.update(action_agent_max_steps=12,action_agent_max_motions=5,action_agent_max_expressions=0)
         await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(self.plugin.action_agent.limits(),{'steps':12,'motions':5,'expressions':0})
         self.assertEqual((await self.plugin.settings_get())['config']['action_agent_max_motions'],5)
 
@@ -340,7 +340,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         values=self.plugin.configuration()
         values['resource_policy']=json.dumps({'appearance_expressions':[name],'enabled_expressions':[name]})
         await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         result=await self.plugin.settings_get()
         self.assertTrue(result['resource_analysis']['expressions'][name]['appearance'])
         self.assertIn('手动标记',result['resource_analysis']['expressions'][name]['summary'])
@@ -351,7 +351,7 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         import uuid,zipfile
         values=self.plugin.configuration();values['shell_connection_mode']='remote'
         await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop');viewer=self.plugin.viewer
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d');viewer=self.plugin.viewer
         viewer.generation=uuid.uuid4().hex
         await viewer.launch()
         self.assertIsNone(viewer.process,'Remote mode must not launch a host renderer')
@@ -372,20 +372,20 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         settings=await self.plugin.settings_get();self.assertTrue(settings['remote_shell']['enabled'])
         values=self.plugin.configuration();values['shell_connection_mode']='disabled'
         await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         async with self.client.get(self.url+'/status',headers={'Authorization':'Bearer '+original_key}) as r:self.assertEqual(r.status,401)
         self.assertEqual(self.plugin.remote_token,'')
 
     async def test_unselected_mode_ignores_legacy_flag_and_stays_stopped_after_save(self):
-        config_path=Path(RUNTIME.name)/'config/plugins/kira_live2d_desktop.json'
+        config_path=Path(RUNTIME.name)/'config/plugins/kira-ai-plugin-live2d.json'
         legacy=json.loads(config_path.read_text(encoding='utf-8'));legacy.pop('shell_connection_mode',None)
         config_path.write_text(json.dumps(legacy),encoding='utf-8')
-        self.manager.plugin_configs['kira_live2d_desktop'].pop('shell_connection_mode',None)
+        self.manager.plugin_configs['kira-ai-plugin-live2d'].pop('shell_connection_mode',None)
         self.plugin.plugin_cfg.pop('shell_connection_mode',None)
         self.native.NativeClient.start.reset_mock()
         with patch.object(self.native,'ensure_runtime',side_effect=AssertionError('Unexpected runtime download')):
-            await self.manager.update_plugin_config('kira_live2d_desktop',{'remote_shell_enabled':True})
-            self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+            await self.manager.update_plugin_config('kira-ai-plugin-live2d',{'remote_shell_enabled':True})
+            self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
             self.assertIsInstance(self.plugin.viewer,self.native.InactiveNativeClient)
             self.assertFalse(self.plugin.viewer.connected)
             self.assertIsNone(self.plugin.viewer.task)
@@ -401,21 +401,21 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
             self.assertFalse(self.plugin.viewer.connected)
             values=self.plugin.configuration();values['bubble_seconds']=21
             await self.plugin.settings_save(self.request({'config':values,'revision':self.plugin.config_revision()}))
-            self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+            self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
             await self.plugin.select_model(self.request({'path':values['native_model_path'],'revision':self.plugin.config_revision()}))
-            self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
-            await self.manager.init_plugin('kira_live2d_desktop')
-            self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+            self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
+            await self.manager.init_plugin('kira-ai-plugin-live2d')
+            self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
             self.assertIsInstance(self.plugin.viewer,self.native.InactiveNativeClient)
             self.native.NativeClient.start.assert_not_awaited()
 
     async def test_mode_selector_starts_only_selected_transport_and_rejects_stale_changes(self):
         await self.plugin.select_shell_mode(self.request({'mode':'disabled','revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.native.NativeClient.start.reset_mock()
         old_revision=self.plugin.config_revision()
         await self.plugin.select_shell_mode(self.request({'mode':'local','revision':old_revision}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(type(self.plugin.viewer),self.native.NativeClient)
         self.native.NativeClient.start.assert_awaited_once()
         from fastapi import HTTPException
@@ -427,15 +427,15 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
                 await self.plugin.select_shell_mode(self.request({'mode':mode,'revision':self.plugin.config_revision()}))
             self.assertEqual(error.exception.status_code,422)
         await self.plugin.select_shell_mode(self.request({'mode':'remote','revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         from plugins.kira_live2d_desktop.native_shell.remote_server import RemoteNativeClient
         self.assertIsInstance(self.plugin.viewer,RemoteNativeClient)
         self.assertGreaterEqual(len(self.plugin.remote_token),32)
-        await self.manager.init_plugin('kira_live2d_desktop')
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        await self.manager.init_plugin('kira-ai-plugin-live2d')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertEqual(self.plugin.shell_connection_mode,'remote')
         await self.plugin.select_shell_mode(self.request({'mode':'disabled','revision':self.plugin.config_revision()}))
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         self.assertIsInstance(self.plugin.viewer,self.native.InactiveNativeClient)
         with self.assertRaises(HTTPException):
             await self.plugin.restart_native_shell(self.request({'revision':self.plugin.config_revision()}))
@@ -471,11 +471,11 @@ class NativeIntegration(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(viewer.ready)
 
     async def test_select_mode_without_model_defers_download_until_model_is_available(self):
-        await self.manager.update_plugin_config('kira_live2d_desktop',{'native_model_path':'','model_path':''})
-        self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+        await self.manager.update_plugin_config('kira-ai-plugin-live2d',{'native_model_path':'','model_path':''})
+        self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
         for mode in ('local','remote','disabled'):
             await self.plugin.select_shell_mode(self.request({'mode':mode,'revision':self.plugin.config_revision()}))
-            self.plugin=self.manager.get_plugin_inst('kira_live2d_desktop')
+            self.plugin=self.manager.get_plugin_inst('kira-ai-plugin-live2d')
             self.assertEqual(self.plugin.shell_connection_mode,mode)
             if mode!='disabled':
                 with patch.object(self.native,'ensure_runtime',side_effect=AssertionError('Download without a model')):
