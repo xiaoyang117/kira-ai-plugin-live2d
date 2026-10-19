@@ -1,7 +1,7 @@
 {
   "plugin_id": "kira-ai-plugin-live2d",
   "display_name": "Live2D 桌宠",
-  "version": "0.25.0",
+  "version": "0.25.1",
   "core_version": ">=3.0.0,<4.0.0",
   "author": "xiaoyang117",
   "description": "原生 Live2D 桌宠、独立动作 Agent、拖动互动与可视调试",

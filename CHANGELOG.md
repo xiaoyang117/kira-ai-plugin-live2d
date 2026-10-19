@@ -1,4 +1,15 @@
-# KiraAI 原生 Live2D 桌宠 0.25.0
+# KiraAI 原生 Live2D 桌宠 0.25.1
+
+## 远程连接端
+
+Windows 独立壳与安卓测试 App 在单独仓库维护：
+
+- 仓库：[kira-live2d-client](https://github.com/xiaoyang117/kira-live2d-client)
+- 下载：[连接端 Releases](https://github.com/xiaoyang117/kira-live2d-client/releases/latest)
+
+插件商店仅提交本插件本体，不单独提交连接端。安卓当前为测试版本，暂不正式上架。
+
+使用远程连接时，在本插件选择“远程壳”，再让连接端填写运行 KiraAI 的电脑地址、端口和访问密钥。连接端主动连接电脑，AI、人设、记忆和动作 Agent 仍由电脑端处理。
 
 0.25.0：插件 ID 和仓库名统一为 kira-ai-plugin-live2d；作者 xiaoyang117，适用 KiraAI >=3.0.0,<4.0.0。补充仓库地址、图标及中英文信息。首次启用自动导入尚未自定义的新配置并接续旧数据目录，保留模型绝对路径、按模型设置、会话身份及远程密钥。需先停用旧插件，避免重复适配器和端口。
 
